@@ -1,11 +1,9 @@
 import importlib
 import pathlib
 
-
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException
 from loguru import logger
-import os
 
 from app.api.errors.http_error import http_error_handler
 from app.api.errors.validation_error import http422_error_handler
@@ -26,38 +24,44 @@ def init_router(app, settings):
 
 def get_subrouters(directory):
     routers = []
-    subrouters = []
-    package = directory.parts[len(pathlib.Path.cwd().parts) :]
-    py_file = f"{'/'.join(package)}"
 
-    for dirpath, _, filenames in os.walk(py_file):
-        if dirpath.endswith("__"):
+    package = directory.parts[len(pathlib.Path.cwd().parts) :]
+    parent_router = None
+
+    try:
+        pymod_file = f"{'.'.join(package)}"
+        pymod = importlib.import_module(pymod_file)
+
+        if "router" in dir(pymod):
+            parent_router = pymod.router
+            routers.append(parent_router)
+    except Exception as e:
+        logger.exception(e)
+        return routers
+
+    subrouters = []
+    for module in directory.iterdir():
+        if "__" == module.name[:2]:
             continue
 
-        parent_router = None
-        for filename in sorted(filenames):
-            pymod_dir = dirpath.replace("/", ".")
-            if filename.endswith(".py"):
-                if filename.startswith("__"):
-                    pymod = importlib.import_module(pymod_dir)
-                    if "router" in dir(pymod):
-                        parent_router = pymod.router
-                        subrouters.append(parent_router)
+        if module.match("*.py"):
+            try:
+                pymod_file = f"{'.'.join(package)}.{module.stem}"
+                pymod = importlib.import_module(pymod_file)
 
-                if not filename.startswith("__"):
-                    pymod = importlib.import_module(pymod_dir)
-                    module_name = filename[:-3]
-                    pymod_file = f"{pymod_dir}.{module_name}"
-                    pymod = importlib.import_module(pymod_file)
-                    if "router" in dir(pymod):
-                        router = pymod.router
-                        if parent_router:
-                            parent_router.include_router(router)
-                        else:
-                            routers.append(router)
+                if "router" in dir(pymod):
+                    subrouters.append(pymod.router)
+            except Exception as e:
+                logger.exception(e)
+
+        elif module.is_dir():
+            subrouters.extend(get_subrouters(module))
 
     for router in subrouters:
-        routers.append(router)
         logger.debug(f"router {router} {router.prefix}")
+        if parent_router:
+            parent_router.include_router(router)
+        else:
+            routers.append(router)
 
     return routers
