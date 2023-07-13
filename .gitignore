@@ -10,3 +10,5 @@ package-lock.json
 *.swp
 *.xml
 test*.py
+*.dev
+.env
