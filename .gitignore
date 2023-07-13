@@ -9,4 +9,4 @@ package-lock.json
 .vscode
 *.swp
 *.xml
-test*
+test*.py
