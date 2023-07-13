@@ -1,7 +1,7 @@
-from enum import Enum
 from typing import List, Tuple
 from pydantic import BaseSettings
 import logging
+import os
 
 
 class DefaultSettings(BaseSettings):
@@ -33,8 +33,5 @@ class DefaultSettings(BaseSettings):
     LOGGING_LEVEL: int = logging.INFO
     LOGGERS: Tuple[str, str] = ("uvicorn.asgi", "uvicorn.access")
 
-    mongodb_dsn: str = "mongodb://localhost:27017/beanie_db"
-    mongodb_db_name: str = "beanie_db"
-
     class Config:
-        env_file = ".env"
+        env_file = ".env" if "pro" in os.getenv("APP_ENV", "").lower() else ".env.dev"
