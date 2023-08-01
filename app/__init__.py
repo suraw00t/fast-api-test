@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 from app.api import init_router
 from app.core.config import get_app_settings
-from app.models import init_beanie
+from app.models import beanie_client
 
 
 def create_app() -> FastAPI:
@@ -30,6 +30,6 @@ def create_app() -> FastAPI:
     @app.on_event("startup")
     async def init_app():
         await init_router(app, settings)
-        await init_beanie(settings)
+        await beanie_client.init_beanie(settings)
 
     return app

@@ -2,7 +2,6 @@ from typing import List
 
 from beanie import Document, Link, Indexed, PydanticObjectId
 import typing as t
-from .fields import FileDocument
 from bson import DBRef, ObjectId
 
 

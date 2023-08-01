@@ -14,7 +14,7 @@ class DefaultSettings(BaseSettings):
     VERSION: str = "0.0.1"
 
     MONGODB_DB: str = "fastapitest_db"
-    MONGODB_URI: str = "mongodb://localhost:27017"
+    MONGODB_URI: str = "mongodb://localhost:27017/"
     MONGODB_USERNAME: str = ""
     MONGODB_PASSWORD: str = ""
 
