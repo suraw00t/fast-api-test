@@ -1,4 +1,9 @@
+import os
+import pathlib
+import inspect
+import importlib
 import beanie
+
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorClientSession
 from loguru import logger
 from .articles import TestDrivenArticle
@@ -9,11 +14,6 @@ __all__ = ["TestDrivenArticle", "HouseAPI", "WindowAPI", "Picture"]
 
 
 async def get_model_modules() -> list:
-    import os
-    import pathlib
-    import inspect
-    import importlib
-
     classes = []
     current_directory = pathlib.Path(__file__).parent
     package = current_directory.parts[len(pathlib.Path.cwd().parts) :]
@@ -52,4 +52,3 @@ async def init_beanie(settings: AppSettings) -> AsyncIOMotorClient:
         )
     except Exception as e:
         logger.error(e)
-    return client
