@@ -29,7 +29,7 @@ class DefaultSettings(BaseSettings):
 
     LOGGING_LEVEL: int = logging.INFO
     LOGGERS: Tuple[str, str] = ("uvicorn.asgi", "uvicorn.access")
-    FILE_PATH: str = ""
+    FILE_PATH: str = ""  # testing for gridfs
 
     class Config:
         env_file = ".env" if "pro" in os.getenv("APP_ENV", "").lower() else ".env.dev"

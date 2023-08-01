@@ -1,5 +1,7 @@
 import importlib
 import pathlib
+import os
+import sys
 
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException
@@ -15,10 +17,11 @@ async def init_router(app, settings):
 
     current_directory = pathlib.Path(__file__).parent
     routers = await get_subrouters(current_directory)
-    # logger.debug(f"routers {routers}")
+    # routers = await test_get_routers()
 
+    # logger.debug(f"routers {routers}")
     for router in routers:
-        logger.debug(f"{router.tags}")
+        # logger.debug(f"{router.tags}")
         app.include_router(router, prefix=f"{settings.API_PREFIX}", tags=router.tags)
 
 
@@ -58,10 +61,38 @@ async def get_subrouters(directory):
             subrouters.extend(await get_subrouters(module))
 
     for router in subrouters:
-        logger.debug(f"router {router} {router.prefix}")
+        logger.info(f"router {router} {router.prefix}")
         if parent_router:
             parent_router.include_router(router)
         else:
             routers.append(router)
+
+    return routers
+
+
+async def test_get_routers():
+    routers = []
+    sub_routers = []
+    package = sys.modules[__name__].__package__
+    py_file = package.replace(".", "/")
+    for dirpath, _, filenames in os.walk(py_file):
+        if dirpath.endswith("__"):
+            continue
+
+        for filename in filenames:
+            if filename.endswith(".py") and not filename.startswith("__"):
+                py_package = os.path.join(dirpath, filename[:-3]).replace("/", ".")
+            else:
+                py_package = dirpath.replace("/", ".")
+
+            module = importlib.import_module(py_package)
+            if hasattr(module, "router"):
+                router = getattr(module, "router")
+                if len(py_package.split(".")) == 3:
+                    routers.append(router)
+                else:
+                    sub_routers.append(router)
+
+                print(module.__name__, ":", py_package)
 
     return routers
