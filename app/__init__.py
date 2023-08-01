@@ -1,9 +1,8 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 from app.api import init_router
 from app.core.config import get_app_settings
 from app.models import init_beanie
-import time
 
 
 def create_app() -> FastAPI:
@@ -20,13 +19,13 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    @app.middleware("http")
-    async def add_process_time_header(request: Request, call_next):
-        start_time = time.time()
-        response = await call_next(request)
-        process_time = time.time() - start_time
-        response.headers["X-Process-Time"] = str(process_time)
-        return response
+    # @app.middleware("http")
+    # async def add_process_time_header(request: Request, call_next):
+    #     start_time = time.time()
+    #     response = await call_next(request)
+    #     process_time = time.time() - start_time
+    #     response.headers["X-Process-Time"] = str(process_time)
+    #     return response
 
     @app.on_event("startup")
     async def init_app():

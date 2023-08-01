@@ -1,12 +1,10 @@
 from typing import List, Tuple
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 import logging
 import os
 
 
 class DefaultSettings(BaseSettings):
-    APP_ENV: str = "development"
-
     DEBUG: bool = False
     DOCS_URL: str = "/docs"
     OPENAPI_PREFIX: str = ""
@@ -16,8 +14,7 @@ class DefaultSettings(BaseSettings):
     VERSION: str = "0.0.1"
 
     MONGODB_DB: str = "fastapitest_db"
-    MONGODB_HOST: str = "localhost"
-    MONGODB_PORT: int = 27017
+    MONGODB_URI: str = "mongodb://localhost:27017"
     MONGODB_USERNAME: str = ""
     MONGODB_PASSWORD: str = ""
 
@@ -32,6 +29,7 @@ class DefaultSettings(BaseSettings):
 
     LOGGING_LEVEL: int = logging.INFO
     LOGGERS: Tuple[str, str] = ("uvicorn.asgi", "uvicorn.access")
+    FILE_PATH: str = ""
 
     class Config:
         env_file = ".env" if "pro" in os.getenv("APP_ENV", "").lower() else ".env.dev"
