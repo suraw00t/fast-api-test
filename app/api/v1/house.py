@@ -3,9 +3,9 @@ from fastapi.responses import HTMLResponse
 from loguru import logger
 from app import models
 import typing as t
-from app import fastapi
+from app import fastapi_app
 
-root_router = fastapi.app
+root_router = fastapi_app.app
 router = APIRouter(prefix="/house")
 
 
@@ -68,26 +68,3 @@ async def create_file(file: t.Annotated[bytes | None, File(description="Now here
         return {"message": "No file sent"}
     else:
         return {"file_size": len(file)}
-
-
-@router.post("/uploadfile/")
-async def create_upload_file(file: UploadFile | None = None):
-    if not file:
-        return {"message": "No upload file sent"}
-    else:
-        return {"filename": file.filename}
-
-
-@router.get("/")
-async def main():
-    content = f"""<body>
-    <form action="{root_router.url_path_for("create_file")}" enctype="multipart/form-data" method="post">
-        <input name="file" type="file">
-        <input type="submit">
-    </form>
-    <form action="{root_router.url_path_for("create_upload_file")}" enctype="multipart/form-data" method="post">
-        <input name="file" type="file">
-        <input type="submit">
-    </form>
-</body>"""
-    return HTMLResponse(content=content)

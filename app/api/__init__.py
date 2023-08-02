@@ -3,6 +3,7 @@ import pathlib
 import os
 import sys
 
+
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException
 from loguru import logger
@@ -71,8 +72,10 @@ async def get_subrouters(directory):
 
 
 async def test_get_routers():
+    modules = []
     routers = []
     sub_routers = []
+    parent_router = None
     package = sys.modules[__name__].__package__
     py_file = package.replace(".", "/")
     for dirpath, _, filenames in os.walk(py_file):
@@ -86,13 +89,46 @@ async def test_get_routers():
                 py_package = dirpath.replace("/", ".")
 
             module = importlib.import_module(py_package)
+            modules.append(module)
+
             if hasattr(module, "router"):
                 router = getattr(module, "router")
                 if len(py_package.split(".")) == 3:
+                    if module.__name__ == py_package and module.__file__.endswith(
+                        "__init__.py"
+                    ):
+                        parent_router = router
+
                     routers.append(router)
                 else:
-                    sub_routers.append(router)
+                    if parent_router and module.__name__ in py_package:
+                        parent_router.include_router(router)
 
-                print(module.__name__, ":", py_package)
+                    routers.append(router)
+
+            print(
+                "module >>",
+                module.__package__,
+                ":",
+                py_package,
+                py_package.startswith(module.__package__),
+            )
+
+    # for module in modules:
+    #     if len(module.__name__.split(".")) < 4:
+    #         if hasattr(module, "router"):
+    #             router = getattr(module, "router")
+    #             print(module.__name__)
+    # print(router)
 
     return routers
+
+
+from fastapi import APIRouter
+
+router = APIRouter(tags=None)
+
+
+@router.get("/")
+async def main():
+    return {"message": "fastapi_test app"}

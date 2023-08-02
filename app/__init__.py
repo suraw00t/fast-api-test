@@ -19,6 +19,10 @@ class App:
             allow_headers=["*"],
         )
 
+        @self.app.get("/")
+        async def root():
+            return {"message": "Hello world"}
+
         # @app.middleware("http")
         # async def add_process_time_header(request: Request, call_next):
         #     start_time = time.time()
@@ -35,4 +39,4 @@ class App:
         return self.app
 
 
-fastapi = App()
+fastapi_app = App()
