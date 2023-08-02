@@ -23,7 +23,7 @@ __all__ = [
 # async def get_model_modules() -> list:
 #     import pathlib, os, importlib
 
-#     classes = []
+#     modules = []
 #     current_directory = pathlib.Path(__file__).parent
 #     package = current_directory.parts[len(pathlib.Path.cwd().parts) :]
 #     py_file = f"{'/'.join(package)}"
@@ -43,10 +43,10 @@ __all__ = [
 #                         cls.__module__ == pymod_file
 #                         and beanie.Document in cls.__bases__
 #                     ):
-#                         classes.append(cls)
+#                         modules.append(cls)
 
-#     logger.debug("beanie models >> " + str(classes))
-#     return classes
+#     logger.debug("beanie models >> " + str(modules))
+#     return modules
 
 
 async def gather_documents() -> t.Sequence[t.Type[DocType]]:
@@ -68,10 +68,11 @@ class BeanieClient:
         )
         logger.info(url)
         self.client = AsyncIOMotorClient(url)
+        self.database = self.client.beanie_db
 
         try:
             await beanie.init_beanie(
-                self.client.beanie_db,
+                self.database,
                 document_models=await gather_documents(),
             )
         except Exception as e:
